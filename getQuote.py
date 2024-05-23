@@ -31,15 +31,18 @@ if column_values:
 next_row_index = len(column_values) + 1
 
 # URL to get the SPX Quote
-url = "https://api.marketdata.app/v1/options/quotes/SPX240621P04980000/?token=WFhqOU9WSG5vVll5X2FFcUdwVzRISXhCcmVTX1FmaFRqQkszQjlzbzZhaz0"
+
+urlSPX = "https://api.marketdata.app/v1/options/quotes/SPX240621P04980000/?token=WFhqOU9WSG5vVll5X2FFcUdwVzRISXhCcmVTX1FmaFRqQkszQjlzbzZhaz0"
+urlBA = "https://api.marketdata.app/v1/options/quotes/BA240816P00165000/?token=WFhqOU9WSG5vVll5X2FFcUdwVzRISXhCcmVTX1FmaFRqQkszQjlzbzZhaz0" 
+urlAAPL = "https://api.marketdata.app/v1/options/quotes/AAPL240816P00165000/?token=WFhqOU9WSG5vVll5X2FFcUdwVzRISXhCcmVTX1FmaFRqQkszQjlzbzZhaz0" 
 
 # Now loop thru and get values and write to spreadsheet
 i = 0
 
 while i < 100: 
 
-   # Invoke the API to get the value
-   response = requests.request("GET", url)
+   # Invoke the API to get the value -- Get SPX
+   response = requests.request("GET", urlSPX)
 
    data = response.json()
 
@@ -67,9 +70,69 @@ while i < 100:
    # Write the value
    worksheet.update_cell(next_row_index, column_index, value_stripped)
 
-   # Sleep for 5 minutes
+   # Get BA
 
-   time.sleep(300)
+   response = requests.request("GET", urlBA)
+
+   data = response.json()
+
+   ask_value = data.get('ask', None)
+   underlying_price = data.get('underlyingPrice', None)
+   open_interest = data.get('openInterest', None)
+
+   value_ask_value = [float(item) for item in ask_value]
+   value_underlying_price = [float(item)for item in underlying_price]
+
+   # Generate Date Time
+   current_datetime = datetime.now()
+
+   # Format the date-time stamp
+   datetime_stamp = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+   print("Datetime:" + str(datetime_stamp) + " Price:" + str(underlying_price) + " Value:" + str(ask_value) + " Open Interest:" + str(open_interest))
+
+   # Strip brackets from the variable
+   value_stripped = str(ask_value).replace("[", "").replace("]","")
+
+   # Write the date / time
+   # no need to write the date again
+   # worksheet.update_cell(next_row_index, 1, datetime_stamp)
+
+   # Write the value (write the next column for BA)
+   worksheet.update_cell(next_row_index, column_index + 1, value_stripped)
+
+   response = requests.request("GET", urlAAPL)
+
+   data = response.json()
+
+   ask_value = data.get('ask', None)
+   underlying_price = data.get('underlyingPrice', None)
+   open_interest = data.get('openInterest', None)
+
+   value_ask_value = [float(item) for item in ask_value]
+   value_underlying_price = [float(item)for item in underlying_price]
+
+   # Generate Date Time
+   current_datetime = datetime.now()
+
+   # Format the date-time stamp
+   datetime_stamp = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+   print("Datetime:" + str(datetime_stamp) + " Price:" + str(underlying_price) + " Value:" + str(ask_value) + " Open Interest:" + str(open_interest))
+
+   # Strip brackets from the variable
+   value_stripped = str(ask_value).replace("[", "").replace("]","")
+
+   # Write the date / time
+   # no need to write the date again
+   # worksheet.update_cell(next_row_index, 1, datetime_stamp)
+
+   # Write the value (write the next column for BA)
+   worksheet.update_cell(next_row_index, column_index + 2, value_stripped)
+
+   # Sleep for 15 minutes
+
+   time.sleep(900)
    i+=1
    next_row_index+=1
 
